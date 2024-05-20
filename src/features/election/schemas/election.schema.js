@@ -25,7 +25,11 @@ export const ElectionSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    candidates: [{
-        type: mongoose.Schema.ObjectId,
-    }]
+    description: {
+        type: String,
+        required: true
+    },
+    candidates: {
+        type: [CandidateSchema]
+    }
 })

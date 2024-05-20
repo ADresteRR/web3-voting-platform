@@ -8,10 +8,35 @@ const UserModel = mongoose.model('User', UserSchema);
  * TODO: have to implement this function 
  */
 export class ElectionRepository {
+    async add(electionData) {
+        try {
+            //TODO:  some validation before saving 
+            const currentDate = new Date();
+            if (!(electionData.startDate >= currentDate && currentDate <= electionData.endDate) || (electionData.endDate < electionData.startDate)) {
+                throw new Error("inappropriate date are chosen")
+            }
+            const newElection = new ElectionModel(electionData);
+            await newElection.save();
+            return {
+                success: true,
+                res: newElection
+            }
+        } catch (err) {
+            return {
+                success: false,
+                error: {
+                    statusCode: 500,
+                    msg: err
+                }
+            }
+        }
+    }
     async active() {
         try {
             const currentDate = new Date();
-            const results = await ElectionModel.find({ endDate: { $lte: currentDate } });
+            // currentDate.setHours(0, 0, 0, 0);
+            // TODO: time related information need to be take care
+            const results = await ElectionModel.find({ endDate: { $gte: currentDate } });
             return {
                 success: true,
                 res: results
@@ -45,7 +70,7 @@ export class ElectionRepository {
     }
     async getCandidates(electionId) {
         try {
-            const results = await ElectionModel.findById(electionId);
+            const results = await ElectionModel.findById(electionId).populate('candidates.candidateId');
             return {
                 success: true,
                 res: results.candidates
@@ -72,7 +97,7 @@ export class ElectionRepository {
             }
             const isPresent = await ElectionModel.findOne({ _id: electionId, candidate: { $in: [candidateDetails._id] } });
             if (!isPresent) {
-                const results = await ElectionModel.findOneAndUpdate({ _id: electionId }, { $push: { candidates: { _id: candidateDetails._id } } });
+                const results = await ElectionModel.findOneAndUpdate({ _id: electionId }, { $push: { candidates: { candidateId: candidateDetails._id } } }, { new: true });
                 // TODO: remove it after testing
                 console.log(results);
             }

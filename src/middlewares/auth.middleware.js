@@ -22,7 +22,7 @@ export const AdminAuth = async (req, res, next) => {
             res.status(400).send("unauthorized! login to continue!");
         } else {
             if (!data.isAdmin) {
-                res.status(400).json({
+                return res.status(400).json({
                     success: false,
                     msg: "this is admin only page"
                 })

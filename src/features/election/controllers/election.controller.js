@@ -8,10 +8,28 @@ export class ElectionController {
     constructor() {
         this.electionRepository = new ElectionRepository();
     }
+    async add(req, res, next) {
+        let { name, startDate, endDate, description } = req.body;
+        const electionData = {
+            name: name,
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
+            description: description
+        }
+        const resp = await this.electionRepository.add(electionData);
+        if (resp.success) {
+            return res.status(201).json({
+                success: true,
+                res: resp.res
+            });
+        } else {
+            next(new customErrorHandler(resp.error.statusCode, resp.error.msg));
+        }
+    }
     async active(req, res, next) {
         const resp = await this.electionRepository.active();
         if (resp.success) {
-            return res.sattus(200).json({
+            return res.status(200).json({
                 success: true,
                 res: resp.res
             })
@@ -21,7 +39,7 @@ export class ElectionController {
     }
     async getDetails(req, res, next) {
         const { electionId } = req.params;
-        const resp = this.electionRepository.getDetails(electionId);
+        const resp = await this.electionRepository.getDetails(electionId);
         if (resp.success) {
             return res.status(200).json({
                 success: true,
@@ -48,7 +66,7 @@ export class ElectionController {
         // TODO: assuming sinle at a time
         const { electionId } = req.params;
         const { candidateEmail } = req.body;
-        const resp = this.electionRepository.addCandidates(electionId, candidateEmail);
+        const resp = await this.electionRepository.addCandidates(electionId, candidateEmail);
         if (resp.success) {
             return res.status(201).json({
                 success: true,

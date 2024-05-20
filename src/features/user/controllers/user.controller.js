@@ -40,12 +40,12 @@ export class UserController {
         };
         const resp = await this.userRepository.login(userData, next);
         if (resp.success) {
-            const token = jwt.sign({ _id: resp.res._id }, process.env.SECRET_KEY, {
+            const token = jwt.sign({ _id: resp.res._id, isAdmin: resp.res.isAdmin }, process.env.SECRET_KEY, {
                 expiresIn: "1h",
             });
             res
                 .cookie("jwtToken", token, { maxAge: 12 * 60 * 60 * 1000, httpOnly: true, secure: false })
-                .json({ success: true, isAdmin: resp.res.isAdmin, msg: "user login successful", token });
+                .json({ success: true, msg: "user login successful", token });
         } else {
             next(new customErrorHandler(resp.error.statusCode, resp.error.msg));
         }
