@@ -58,5 +58,20 @@ export class ElectionController {
             next(new customErrorHandler(resp.error.statusCode, resp.error.msg));
         }
     }
+    // this set of functions are related to give vote and geting resuls
+    async vote(req, res, next) {
+        const { candidateId } = req.body;
+        const { electionId } = req.params;
+        const userId = req._id;
+        const resp = this.electionRepository.vote(electionId, candidateId, userId);
+        if (resp.success) {
+            return res.status(201).json({
+                success: true,
+                msg: `you ${userId} voted ${candidateId}`
+            });
+        } else {
+            next(new customErrorHandler(resp.error.statusCode, resp.error.msg));
+        }
+    }
 
 }

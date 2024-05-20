@@ -67,12 +67,65 @@ export class ElectionRepository {
         try {
             // TODO: have to add the candidate if not already present in the list
             const candidateDetails = await UserModel.findOne({ email: candidateEmail });
-            const isPresent = await ElectionModel.findOne({ candidates: { $in: [candidateDetails._id] } });
+            if (!candidateDetails) {
+                throw new Error(`no candidate found with email : ${candidateEmail}`);
+            }
+            const isPresent = await ElectionModel.findOne({ _id: electionId, candidate: { $in: [candidateDetails._id] } });
             if (!isPresent) {
-                await ElectionModel.findOneAndUpdate({ _id: electionId }, { $push: { candidates: candidateDetails._id } });
+                const results = await ElectionModel.findOneAndUpdate({ _id: electionId }, { $push: { candidates: { _id: candidateDetails._id } } });
+                // TODO: remove it after testing
+                console.log(results);
             }
             return {
                 success: true
+            }
+        } catch (err) {
+            return {
+                success: false,
+                error: {
+                    statusCode: 500,
+                    msg: err
+                }
+            }
+        }
+    }
+
+    // from here voting functionality is being added
+    async vote(electionId, candidateId, userId) {
+        try {
+            const currentDate = new Date();
+            const electionDetails = await ElectionModel.findOneAndUpdate({ _id: electionId, startDate: { $lte: currentDate }, endDate: { $gte: currentDate }, candidates: { $elemMatch: { _id: candidateId } } }, { $push: { "candidates.$.votes": userId } },
+                { new: true });
+            if (!electionDetails) {
+                throw new Error(`election not found or expired`);
+            }
+            // TODO: this response for testing remove it after it
+            return {
+                success: true,
+                res: electionDetails
+            }
+
+        } catch (err) {
+            return {
+                success: false,
+                error: {
+                    statusCode: 500,
+                    msg: err
+                }
+            }
+        }
+    }
+    // this function are related to result and all those thing
+    async getVoteCount(electionId) {
+        try {
+            const electionDetails = await ElectionModel.findById(electionId);
+            const result = [];
+            for (let i = 0; i < electionDetails.candidates.length; i++) {
+                result.append({ candidateId: electionDetails[i].candidateId, voteCount: electionDetails[i].votes.length });
+            }
+            return {
+                success: true,
+                res: result
             }
         } catch (err) {
             return {

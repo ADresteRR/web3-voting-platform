@@ -27,3 +27,7 @@ ElectionRouter.get("/:electionId/get-candidates", UserAuth, (req, res, next) => 
 ElectionRouter.post("/:electionId/add-candiate", AdminAuth, (req, res, next) => {
     electionController.addCandidates(req, res, next);
 });
+// This section endpoints are related to votes
+ElectionRouter.post("/:electionId/vote", (req, res, next) => {
+    electionController.vote(req, res, next);
+});
