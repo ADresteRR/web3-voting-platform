@@ -8,12 +8,14 @@ const UserModel = mongoose.model('User', UserSchema);
  * 
  */
 export class UserRepository {
-    async register(userData) {
+    async register(userData, next) {
         try {
-            userData.password = hashPassword(userData.password);
-            const newUser = new UserModel(UserModel);
+            const newUser = new UserModel(userData);
             await newUser.save();
-            return newUser;
+            return {
+                success: true,
+                res: newUser
+            }
 
         } catch (err) {
             return {
@@ -29,10 +31,11 @@ export class UserRepository {
         try {
             const { email, password } = userData;
             const userInfo = await UserModel.findOne({ email: email });
+            console.log(userInfo)
             if (!userInfo) {
                 throw new Error(`no user found with email id`);
             }
-            const passwordMatched = compareHashedPassword(password, userInfo.password, next);
+            const passwordMatched = await compareHashedPassword(password, userInfo.password, next);
             if (!passwordMatched) {
                 throw new Error(`password is incorred`);
             }
