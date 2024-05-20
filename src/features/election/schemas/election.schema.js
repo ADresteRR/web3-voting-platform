@@ -1,5 +1,16 @@
 import mongoose from "mongoose";
 
+const CandidateSchema = new mongoose.Schema({
+    candidateId: {
+        type: mongoose.Schema.ObjectId,
+        ref: "User",
+        required: true
+    },
+    votes: [{
+        type: mongoose.Schema.ObjectId,
+        ref: "User"
+    }]
+})
 export const ElectionSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -14,8 +25,7 @@ export const ElectionSchema = new mongoose.Schema({
         type: Date,
         required: true
     },
-    candidates: {
+    candidates: [{
         type: mongoose.Schema.ObjectId,
-        ref: "User"
-    }
+    }]
 })
