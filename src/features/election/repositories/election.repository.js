@@ -91,6 +91,20 @@ export class ElectionRepository {
     }
 
     // from here voting functionality is being added
+    async voted(electionId, candidateId, userId) {
+        try {
+            const result = await ElectionModel.findOne({ _id: electionId, candidates: { $elemMatch: { _id: candidateId, votes: { $in: [voteValue] } } } });
+            return (result ? true : false);
+        } catch (err) {
+            return {
+                success: false,
+                error: {
+                    statusCode: 500,
+                    msg: err
+                }
+            }
+        }
+    }
     async vote(electionId, candidateId, userId) {
         try {
             const currentDate = new Date();

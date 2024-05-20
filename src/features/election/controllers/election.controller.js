@@ -59,10 +59,17 @@ export class ElectionController {
         }
     }
     // this set of functions are related to give vote and geting resuls
+    async voted(req, res, next) {
+        const { electionId } = req.params;
+    }
     async vote(req, res, next) {
         const { candidateId } = req.body;
         const { electionId } = req.params;
         const userId = req._id;
+        const voted = await this.electionRepository.voted(electionId, candidateId, userId);
+        if (voted) {
+            throw new Error(`user with id ${userId} already voted`);
+        }
         const resp = this.electionRepository.vote(electionId, candidateId, userId);
         if (resp.success) {
             return res.status(201).json({
