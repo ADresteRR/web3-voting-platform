@@ -118,7 +118,7 @@ export class ElectionRepository {
     // from here voting functionality is being added
     async voted(electionId, candidateId, userId) {
         try {
-            const result = await ElectionModel.findOne({ _id: electionId, candidates: { $elemMatch: { _id: candidateId, votes: { $in: [voteValue] } } } });
+            const result = await ElectionModel.findOne({ _id: electionId, candidates: { $elemMatch: { candidateId: candidateId, votes: { $in: [userId] } } } });
             return (result ? true : false);
         } catch (err) {
             return {
@@ -133,7 +133,7 @@ export class ElectionRepository {
     async vote(electionId, candidateId, userId) {
         try {
             const currentDate = new Date();
-            const electionDetails = await ElectionModel.findOneAndUpdate({ _id: electionId, startDate: { $lte: currentDate }, endDate: { $gte: currentDate }, candidates: { $elemMatch: { _id: candidateId } } }, { $push: { "candidates.$.votes": userId } },
+            const electionDetails = await ElectionModel.findOneAndUpdate({ _id: electionId, startDate: { $lte: currentDate }, endDate: { $gte: currentDate }, candidates: { $elemMatch: { candidateId: candidateId } } }, { $push: { "candidates.$.votes": userId } },
                 { new: true });
             if (!electionDetails) {
                 throw new Error(`election not found or expired`);

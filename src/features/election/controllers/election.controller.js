@@ -86,9 +86,12 @@ export class ElectionController {
         const userId = req._id;
         const voted = await this.electionRepository.voted(electionId, candidateId, userId);
         if (voted) {
-            throw new Error(`user with id ${userId} already voted`);
+            return res.status(400).json({
+                success: false,
+                msg: `user ${userId} already in election with id: ${electionId}`
+            });
         }
-        const resp = this.electionRepository.vote(electionId, candidateId, userId);
+        const resp = await this.electionRepository.vote(electionId, candidateId, userId);
         if (resp.success) {
             return res.status(201).json({
                 success: true,
